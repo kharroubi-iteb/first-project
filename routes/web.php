@@ -1,64 +1,45 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PageController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ProfileController;
 
-// Page accueil
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Page d'accueil : Redirige vers la liste des tâches
+// Le middleware 'auth' ici forcera la redirection vers /login si l'utilisateur n'est pas connecté
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('tasks.index');
+})->middleware(['auth']);
+
+/*
+|--------------------------------------------------------------------------
+| Routes Protégées (Connexion requise)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    // Gestion des Tâches (CRUD complet)
+    Route::resource('tasks', TaskController::class);
+
+    // Gestion du Profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Pages via le contrôleur
-Route::get('/home', [PageController::class,'home']);
-Route::get('/about', [PageController::class,'about']);
-Route::get('/contact', [PageController::class,'contact']);
-Route::get('/services', [PageController::class,'services']);
-Route::get('/blog', [PageController::class, 'blog']);
-
-// Exemple de routes supplémentaires
-Route::get('/utilisateur/{nom}', function ($nom) {
-    return "<h1>Profil de $nom</h1>
-            <p>Bienvenue sur votre page !</p>";
-});
-
-Route::get('/article/{id}/{titre}', function ($id, $titre) {
-    return "<h1>Article #$id : $titre</h1>";
-});
-
-Route::get('/bonjour/{nom?}', function ($nom = 'Visiteur') {
-    return "<h1>Bonjour, $nom !</h1>";
-});
-
-Route::get('/produit/{id}', function ($id) {
-    return "<h1>Produit #$id</h1>";
-})->where('id', '[0-9]+');
-
-Route::get('/calculer/{a}/{b}', function ($a, $b) {
-    $somme = $a + $b;
-    return "La somme de $a et $b est : $somme";
-});
-
-Route::get('/age/{age}', function ($age) {
-    return $age >= 18 ? "Vous êtes majeur" : "Vous êtes mineur";
-});
-
-Route::get('/equipe/{membre?}', function ($membre = 'toute lequipe') {
-    return "membre : $membre";
-});
-
-Route::get('/profil', function () {
-    return view('profil', [
-        'nom' => 'Alice',
-        'age' => 25,
-        'ville' => 'Paris'
-    ]);
-});
-
-Route::get('/produits', function(){
-    $produits = [
-        ['nom'=>'ordinateur','prix'=>258],
-        ['nom'=>'souris','prix'=>255],
-        ['nom'=>'clavier','prix'=>155]
-    ];
-    return view('produits',['produits'=>$produits]);
-});
+/*
+|--------------------------------------------------------------------------
+| Authentification (Login, Register, etc.)
+|--------------------------------------------------------------------------
+*/
+require __DIR__.'/auth.php';

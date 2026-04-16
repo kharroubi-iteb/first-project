@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Importation nécessaire
 
 class User extends Authenticatable
 {
@@ -44,5 +45,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations Eloquent (Etape 3.2 du TP)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Un utilisateur peut avoir plusieurs taches.
+     * Cette méthode permet d'utiliser : auth()->user()->tasks
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+        // Laravel cherchera automatiquement la colonne 'user_id' dans la table 'tasks'
     }
 }
